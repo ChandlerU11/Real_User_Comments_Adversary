@@ -11,6 +11,7 @@ def wait(originalTime, fileName):
     while(os.path.getmtime(fileName) <= originalTime):
         time.sleep(1)
     time.sleep(3)
+
 def get_preds():
     fileName = '../ReST_Temp_Files/'+ args.model +'_preds_towards_fake'
     originalTime = os.path.getmtime(fileName)
@@ -66,9 +67,9 @@ parser.add_argument(
     help='model to use for prediction')
 args = parser.parse_args()
 
-train = pd.read_csv('~/fake_news_data/'+ args.dataset + '_train.csv', converters = {'title':literal_eval,'content':literal_eval,'comments':literal_eval})
-test = pd.read_csv('~/fake_news_data/'+ args.dataset + '_test.csv', converters = {'title':literal_eval,'content':literal_eval,'comments':literal_eval})
-df = pd.concat([train, test]).reset_index()
+df = pd.read_csv('~/fake_news_data/'+ args.dataset + '_train.csv', converters = {'title':literal_eval,'content':literal_eval,'comments':literal_eval})
+#test = pd.read_csv('~/fake_news_data/'+ args.dataset + '_test.csv', converters = {'title':literal_eval,'content':literal_eval,'comments':literal_eval})
+#df = pd.concat([train, test]).reset_index()
 df_no_comm = df.copy()
 df_no_comm['comments'] = [[] for x in df_no_comm['comments']]
 

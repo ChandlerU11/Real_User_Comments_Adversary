@@ -36,21 +36,14 @@ model = SentenceTransformer("johngiorgi/declutr-small", device=device)
 train = pd.read_csv('~/fake_news_data/'+ args.dataset + '_train.csv', converters = {'title':literal_eval,'content':literal_eval,'comments':literal_eval})
 test = pd.read_csv('~/fake_news_data/'+ args.dataset + '_test.csv', converters = {'title':literal_eval,'content':literal_eval,'comments':literal_eval})
 
-df = pd.concat([train,test]).reset_index()
-df['content'] = [' '.join(each) for each in df['content']]
+train['content'] = [' '.join(each) for each in train['content']]
+test['content'] = [' '.join(each) for each in test['content']]
 
-pos = df[df['label'] == 1]
-pos = pos.reset_index()
-neg = df[df['label'] == 0]
-neg = neg.reset_index()
+embeddings = model.encode(test['content'].tolist())
+test['embeddings'] = embeddings.tolist()
 
-embeddings = model.encode(pos['content'].tolist())
-pos['embeddings'] = embeddings.tolist()
-
-embeddings = model.encode(neg['content'].tolist())
-neg['embeddings'] = embeddings.tolist()
-
-print(pos, neg)
+embeddings = model.encode(train['content'].tolist())
+train['embeddings'] = embeddings.tolist()
 
 def find_comms(df1, df2):
   single_attack_comms = []
@@ -72,10 +65,14 @@ def find_comms(df1, df2):
     pos_attack_comms.append(comm_list[:30])
   return single_attack_comms, pos_attack_comms
 
-pos['1_attack_comm'], pos['30_attack_comm'] = find_comms(pos, neg)
-neg['1_attack_comm'], neg['30_attack_comm'] = find_comms(neg, pos)
+test_neg = test[test['label'] == 0].reset_index()
+test_pos = test[test['label'] == 1].reset_index()
 
-pos_out = pos[['id', 'label', '1_attack_comm', '30_attack_comm']]
-neg_out = neg[['id', 'label', '1_attack_comm', '30_attack_comm']]
+
+test_pos['1_attack_comm'], test_pos['30_attack_comm'] = find_comms(test_pos, train[train['label'] == 0].reset_index())
+test_neg['1_attack_comm'], test_neg['30_attack_comm'] = find_comms(test_neg, train[train['label'] == 1].reset_index())
+
+pos_out = test_pos[['id', 'label', '1_attack_comm', '30_attack_comm']]
+neg_out = test_neg[['id', 'label', '1_attack_comm', '30_attack_comm']]
 df_out = pd.concat([pos_out, neg_out])
-df_out.to_csv('copycat_attack' + args.dataset + '.csv')
+df_out.to_csv('attack_candidate_files/copycat_attack_' + args.dataset + '.csv')

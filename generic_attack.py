@@ -31,13 +31,13 @@ device = 'cpu'
 # Load the model
 model = SentenceTransformer("johngiorgi/declutr-small", device=device)
 
-train = pd.read_csv('../fake_news_data/'+ args.dataset + '_train.csv', converters = {'title':literal_eval,'content':literal_eval,'comments':literal_eval})
-test = pd.read_csv('../fake_news_data/'+ args.dataset + '_test.csv', converters = {'title':literal_eval,'content':literal_eval,'comments':literal_eval})
-df = pd.concat([train, test]).reset_index()
+df = pd.read_csv('../fake_news_data/'+ args.dataset + '_train.csv', converters = {'title':literal_eval,'content':literal_eval,'comments':literal_eval})
+#test = pd.read_csv('../fake_news_data/'+ args.dataset + '_test.csv', converters = {'title':literal_eval,'content':literal_eval,'comments':literal_eval})
+#df = pd.concat([train, test]).reset_index()
 df['content'] = [' '.join(each) for each in df['content']]
 df['content_embeddings'] = model.encode(df['content'].tolist()).tolist()
 
-comment_df = pd.read_csv('comment_influence_' + args.dataset + '_' + args.model + '.csv')
+comment_df = pd.read_csv('attack_candidate_files/comment_influence_' + args.dataset + '_' + args.model + '.csv')
 comment_df['comment_embedding'] = model.encode(comment_df['comments'].tolist()).tolist()
 
 def find_dissimilar_comms(df):
@@ -77,5 +77,5 @@ generic_comms_towards_fake.extend(generic_comms_towards_real)
 df_out['comment'] = generic_comms_towards_fake
 df_out['label'] = label
 print(df_out)
-df_out.to_csv('generic_attack_comments_' + args.dataset + '_' + args.model + '.csv', index = False)
+df_out.to_csv('attack_candidate_files/generic_attack_comments_' + args.dataset + '_' + args.model + '.csv', index = False)
 
