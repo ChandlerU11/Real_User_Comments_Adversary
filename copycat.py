@@ -13,7 +13,7 @@ import pickle
 from ast import literal_eval
 import os
 from tqdm import tqdm
-from scipy.spatial.distance import cosine
+from scipy.spatial.distance import cdist
 import random
 import argparse
 
@@ -29,7 +29,8 @@ if torch.cuda.is_available():
     device = 0
 else:
     device = 'cpu'
-device = 'cpu'
+#device = 'cpu'
+print(device)
 # Load the model
 model = SentenceTransformer("johngiorgi/declutr-small", device=device)
 
@@ -51,9 +52,9 @@ def find_comms(df1, df2):
   for i in tqdm(range(len(df1))):
     embeds = []
     for x in range(len(df2['embeddings'])):
-      embeds.append(cosine(df1.loc[i]['embeddings'], df2.loc[x]['embeddings']))
+      embeds.append(cdist([df1.loc[i]['embeddings']], [df2.loc[x]['embeddings']], metric='cosine')[0])
     zz = list(zip(list(df2['comments']),embeds))
-    att = sorted(zz, key = lambda x: x[1])
+    att = sorted(zz, key = lambda x: x[1], reverse = True)
     att = [x for x in att if len(x[0]) > 0]
     try:
       single_attack_comms.append(random.choice(att[0][0]))

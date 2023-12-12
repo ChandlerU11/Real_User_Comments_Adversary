@@ -27,13 +27,14 @@ if torch.cuda.is_available():
     device = 0
 else:
     device = 'cpu'
-device = 'cpu'
+print(device)
+#device = 'cpu'
 # Load the model
 model = SentenceTransformer("johngiorgi/declutr-small", device=device)
 
-df = pd.read_csv('../fake_news_data/'+ args.dataset + '_train.csv', converters = {'title':literal_eval,'content':literal_eval,'comments':literal_eval})
-#test = pd.read_csv('../fake_news_data/'+ args.dataset + '_test.csv', converters = {'title':literal_eval,'content':literal_eval,'comments':literal_eval})
-#df = pd.concat([train, test]).reset_index()
+train = pd.read_csv('../fake_news_data/'+ args.dataset + '_train.csv', converters = {'title':literal_eval,'content':literal_eval,'comments':literal_eval})
+test = pd.read_csv('../fake_news_data/'+ args.dataset + '_test.csv', converters = {'title':literal_eval,'content':literal_eval,'comments':literal_eval})
+df = pd.concat([train, test]).reset_index()
 df['content'] = [' '.join(each) for each in df['content']]
 df['content_embeddings'] = model.encode(df['content'].tolist()).tolist()
 
@@ -46,8 +47,6 @@ def find_dissimilar_comms(df):
         distance = cdist([df.loc[i]['content_embeddings']], [df.loc[i]['comment_embedding']], metric='cosine')[0]
         if distance >= .8:
             gen_attacks.append(df.loc[i]['comments'])
-        #att = list(zip(df['comments'].tolist(), distances))
-        #gen_attacks.extend([comment for comment, dist in att if dist >= .8])
     return gen_attacks
 
 pos_df = df[df['label'] == 1]
@@ -63,8 +62,12 @@ neg_df = df[df['label'] == 0]
 #print(pos_df[['id', 'content']].merge(comment_df.loc[(comment_df['conf_fake_diff'] > 0) & (comment_df['label'] == 1)], how = 'inner', on = 'id')[['id', 'comments', 'label']])
 #print(neg_df[['id', 'content']].merge(comment_df.loc[(comment_df['conf_fake_diff'] < 0) & (comment_df['label'] == 0)], how = 'inner', on = 'id')[['id', 'comments', 'label']])
 
-pos_df = pos_df[['id', 'content', 'content_embeddings']].merge(comment_df.loc[(comment_df['conf_fake_diff'] > 0) & (comment_df['label'] == 1)], how = 'inner', on = 'id')
-neg_df = neg_df[['id', 'content', 'content_embeddings']].merge(comment_df.loc[(comment_df['conf_fake_diff'] < 0) & (comment_df['label'] == 0)], how = 'inner', on = 'id')
+#pos_df = pos_df[['id', 'content', 'content_embeddings']].merge(comment_df.loc[(comment_df['conf_fake_diff'] > 0) & (comment_df['label'] == 1)], how = 'inner', on = 'id')
+#neg_df = neg_df[['id', 'content', 'content_embeddings']].merge(comment_df.loc[(comment_df['conf_fake_diff'] < 0) & (comment_df['label'] == 0)], how = 'inner', on = 'id')
+
+pos_df = pos_df[['id', 'content', 'content_embeddings']].merge(comment_df.loc[(comment_df['conf_fake_diff'] > 0)], how = 'inner', on = 'id')
+neg_df = neg_df[['id', 'content', 'content_embeddings']].merge(comment_df.loc[(comment_df['conf_fake_diff'] < 0)], how = 'inner', on = 'id')
+
 
 print(pos_df.columns)
 generic_comms_towards_fake = find_dissimilar_comms(pos_df)

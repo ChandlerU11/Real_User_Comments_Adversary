@@ -67,9 +67,9 @@ parser.add_argument(
     help='model to use for prediction')
 args = parser.parse_args()
 
-df = pd.read_csv('~/fake_news_data/'+ args.dataset + '_train.csv', converters = {'title':literal_eval,'content':literal_eval,'comments':literal_eval})
-#test = pd.read_csv('~/fake_news_data/'+ args.dataset + '_test.csv', converters = {'title':literal_eval,'content':literal_eval,'comments':literal_eval})
-#df = pd.concat([train, test]).reset_index()
+train = pd.read_csv('~/fake_news_data/'+ args.dataset + '_train.csv', converters = {'title':literal_eval,'content':literal_eval,'comments':literal_eval})
+test = pd.read_csv('~/fake_news_data/'+ args.dataset + '_test.csv', converters = {'title':literal_eval,'content':literal_eval,'comments':literal_eval})
+df = pd.concat([train, test]).reset_index()
 df_no_comm = df.copy()
 df_no_comm['comments'] = [[] for x in df_no_comm['comments']]
 
@@ -89,7 +89,7 @@ df_single.to_csv(t5_gen_file, escapechar = '\\')
 wait(ot,t5_gen_file)
 
 df_single['conf_fake_post'] = get_preds()
-df_single['conf_fake_diff'] = df_single['conf_fake_pre'] - df_single['conf_fake_post']
+df_single['conf_fake_diff'] = df_single['conf_fake_post'] - df_single['conf_fake_pre']
 df_single['comments'] = [x[0] for x in df_single['comments']]
 df_single = df_single[['id', 'comments', 'label', 'conf_fake_diff']]
-df_single.to_csv('comment_influence_' + args.dataset + '_' + args.model + '.csv', index = False)
+df_single.to_csv('attack_candidate_files/comment_influence_' + args.dataset + '_' + args.model + '.csv', index = False)

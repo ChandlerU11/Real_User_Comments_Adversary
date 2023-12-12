@@ -40,18 +40,23 @@ def clean_text(content):
 
   return cleaned_text
 
-#train = pd.read_csv('../fake_news_data/'+ args.dataset + '_train.csv', converters = {'title':literal_eval,'content':literal_eval,'comments':literal_eval})
-df = pd.read_csv('../fake_news_data/'+ args.dataset + '_test.csv', converters = {'title':literal_eval,'content':literal_eval,'comments':literal_eval})
-#df = pd.concat([train, test]).reset_index()
+train = pd.read_csv('../fake_news_data/'+ args.dataset + '_train.csv', converters = {'title':literal_eval,'content':literal_eval,'comments':literal_eval})
+test = pd.read_csv('../fake_news_data/'+ args.dataset + '_test.csv', converters = {'title':literal_eval,'content':literal_eval,'comments':literal_eval})
+df = pd.concat([train, test]).reset_index()
 
 df['content'] = [' '.join(each) for each in df['content']]
 df['clean_content'] = df['content'].apply(clean_text)
+
+test['content'] = [' '.join(each) for each in test['content']]
+test['clean_content'] = test['content'].apply(clean_text)
 
 comment_df = pd.read_csv('attack_candidate_files/comment_influence_' + args.dataset + '_' + args.model + '.csv')
 comment_df['clean_comments'] = comment_df['comments'].apply(clean_text)
 
 vect = TfidfVectorizer(stop_words=stop_words, max_features=1000)
-
+train_text = df['clean_content'].tolist()
+train_text.extend(comment_df['clean_comments'].tolist())
+vectorizer = vect.fit(train_text)
 
 for comp in tqdm(range(3, 21)):
     lda_model = LatentDirichletAllocation(n_components=comp,
@@ -59,19 +64,19 @@ for comp in tqdm(range(3, 21)):
                                             random_state=42,
                                             max_iter=10)
 
-    vect_text = vect.fit_transform(df['clean_content'])
-    compute_lda = lda_model.fit(vect_text)
-    df['content_lda'] = compute_lda.transform(vect_text).tolist()
+    compute_lda = lda_model.fit(vectorizer.transform(train_text))
+   
+    test['content_lda'] = compute_lda.transform(vectorizer.transform(test['clean_content'].tolist())).tolist()
+    comment_df['comment_lda'] = compute_lda.transform(vectorizer.transform(comment_df['clean_comments'].tolist())).tolist()
 
-    vect_text = vect.transform(comment_df['clean_comments'])
-    comment_df['comment_lda'] = compute_lda.transform(vect_text).tolist()
-
-    pos_df = df[df['label'] == 1].reset_index()
-    neg_df = df[df['label'] == 0].reset_index()
+    pos_df = test[test['label'] == 1].reset_index()
+    neg_df = test[test['label'] == 0].reset_index()
 
     NUM_NEIGHBORS = 30
     neigh = NearestNeighbors(n_neighbors=NUM_NEIGHBORS)
-    neg_comms_filt = comment_df.loc[(comment_df['conf_fake_diff'] < 0) & (comment_df['label'] == 0)].reset_index()
+    #neg_comms_filt = comment_df.loc[(comment_df['conf_fake_diff'] < 0) & (comment_df['label'] == 0)].reset_index()
+    neg_comms_filt = comment_df.loc[(comment_df['conf_fake_diff'] < 0)].reset_index()
+
 
     neigh.fit(neg_comms_filt['comment_lda'].tolist())
     attack_comms_spec = []
@@ -86,9 +91,8 @@ for comp in tqdm(range(3, 21)):
 
     #################################################################################################
     neigh = NearestNeighbors(n_neighbors=NUM_NEIGHBORS)
-    pos_comms_filt = comment_df.loc[(comment_df['conf_fake_diff'] > 0) & (comment_df['label'] == 1)].reset_index()
-    vect_text = vect.transform(pos_comms_filt['clean_comments'])
-    pos_comms_filt['comment_lda'] = compute_lda.transform(vect_text).tolist()
+    #pos_comms_filt = comment_df.loc[(comment_df['conf_fake_diff'] > 0) & (comment_df['label'] == 1)].reset_index()
+    pos_comms_filt = comment_df.loc[(comment_df['conf_fake_diff'] > 0)].reset_index()
 
     neigh.fit(pos_comms_filt['comment_lda'].tolist())
     attack_comms_spec = []
