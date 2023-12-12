@@ -1,4 +1,5 @@
 # Real_User_Comments_Adversary
+Implementation of Copycat, Generic, and Topic-Specific attacks for fake news detectors. Uses the fake_news_data repo (https://github.com/ChandlerU11/fake_news_data) and interacts with surrogate classifiers in same manner as described in the ReST adversary README (https://github.com/ChandlerU11/ReST_Adversary). 
 
 ## Create Conda Env "real_comms"
 `conda env create -f env.yml`
