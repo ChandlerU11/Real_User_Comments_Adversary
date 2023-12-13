@@ -13,33 +13,33 @@ parser.add_argument(
     '-dataset',
     type=str,
     default="gossipcop",
-    help='dataset to use')
+    help='Dataset to use.')
 
 parser.add_argument(
     '-model',
     type=str,
     default="gossipcop",
-    help='model to use for prediction')
+    help='Model to use for prediction.')
 
 parser.add_argument(
     '-attack',
     type=str,
     default="all",
-    help='model to use for prediction')
+    help='Attack type [specific, generic, copycat, all]')
 
 
 parser.add_argument(
     '-target_label',
     type=str,
     default='real',
-    help='model to use for prediction')
+    help='Desired target label [real, fake]')
 
 
 parser.add_argument(
     '-user_comms',
     type=str,
-    default=False,
-    help='model to use for prediction')
+    default='yes',
+    help='Test with up to 10 user comments present? [yes, no]')
 
 args = parser.parse_args()
 
@@ -48,14 +48,14 @@ def wait(originalTime, fileName):
         time.sleep(1)
     time.sleep(3)
 
-def get_preds(test_sing = False):
+def get_preds():
     fileName = '../ReST_Temp_Files/'+ args.model +'_preds_post'
     originalTime = os.path.getmtime(fileName)
     
     print("Calling " + args.model)
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect(("localhost", 9988))
-    if test_sing == False:
+    if args.user_comms == 'yes':
         s.sendall(b'Test Multiple')
     else:
         s.sendall(b'Test Single')
@@ -98,7 +98,7 @@ def copycat_attack(df):
     wait(ot,t5_gen_file)
     
     print(args.user_comms)
-    pre, post = get_preds(test_sing = args.user_comms)
+    pre, post = get_preds()
     print(pre,post)
     out_df['pre'] = pre
     out_df['post'] = post
@@ -136,7 +136,7 @@ def specific_attack(df):
         wait(ot,t5_gen_file)
         
         #print(args.user_comms)
-        pre, post = get_preds(test_sing = args.user_comms)
+        pre, post = get_preds()
         #print(pre,post)
         out_df['pre'] = pre
         out_df['post'] = post
@@ -182,7 +182,7 @@ def generic_attack(df):
     wait(ot,t5_gen_file)
     
     print(args.user_comms)
-    pre, post = get_preds(test_sing = args.user_comms)
+    pre, post = get_preds()
     print(pre,post)
     out_df['pre'] = pre
     out_df['post'] = post
