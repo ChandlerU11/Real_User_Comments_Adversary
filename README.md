@@ -16,4 +16,4 @@ Implementation of Copycat, Generic, and Topic-Specific attacks for fake news det
 `python specific_attack.py -dataset [gossipcop, politifact] -model [textcnn, roberta, defend]`
 
 ## Test Attack Effectiveness
-`python test.py -dataset [gossipcop, politifact] -model [textcnn, roberta, defend] -attack [copycat, generic, specific, all] -target_label [fake, real] -user_comms [True, False]`
+`python test.py -dataset [gossipcop, politifact] -model [textcnn, roberta, defend] -attack [copycat, generic, specific, all] -target_label [fake, real] -user_comms [yes, no]`
