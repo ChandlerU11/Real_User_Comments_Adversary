@@ -6,6 +6,7 @@ Implementation of Copycat, Generic, and Topic-Specific attacks for fake news det
 
 ## Get CopyCat Comments
 `python copycat_attack.py -dataset [gossipcop, politifact]`
+
 *Copycat works independently of attacked model
 
 ## Get Generic Comments
