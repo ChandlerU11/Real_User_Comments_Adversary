@@ -11,6 +11,9 @@ Implementation of Copycat, Generic, and Topic-Specific attacks for fake news det
 ## Create Conda Env "real_comms"
 `conda env create -f env.yml`
 
+## Find Individual Comment Influence on Classification
+`python find_comment_influence.py -dataset [gossipcop, politifact] -model [textcnn, roberta, defend]`
+
 ## Get CopyCat Comments
 `python copycat_attack.py -dataset [gossipcop, politifact]`
 
