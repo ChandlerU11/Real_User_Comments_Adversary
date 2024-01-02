@@ -2,10 +2,10 @@
 Implementation of Copycat, Generic, and Topic-Specific attacks for fake news detectors. Uses the fake_news_data repo (https://github.com/ChandlerU11/fake_news_data) and interacts with surrogate classifiers in same manner as described in the ReST adversary README (https://github.com/ChandlerU11/ReST_Adversary). 
 
 ## Workflow
-1. Clean fake news data (skip if already done for ReST_Adversary)
-2. Train classifier (dEFEND, RoBERTa, RNN, or TextCNN) on fake news dataset (skip if already done for ReST_Adversary)
+1. Clean fake news data (skip if already done  for ReST)
+2. Train classifier (dEFEND, RoBERTa, RNN, or TextCNN) on fake news dataset (skip if already done  for ReST)
 3. Start desired classifier prediction script
-4. Run generic, specific, and copycat (copycat runs independently of attacked model) attack scripts
+4. Run generic, specific, and copycat attack scripts
 5. Repeat step 3-4 for all fake news classifiers
 
 ## Create Conda Env "real_comms"
@@ -25,5 +25,10 @@ Implementation of Copycat, Generic, and Topic-Specific attacks for fake news det
 ## Get Specific Comments
 `python specific_attack.py -dataset [gossipcop, politifact] -model [textcnn, roberta, defend]`
 
-## Test Attack Effectiveness
+## Test
 `python test.py -dataset [gossipcop, politifact] -model [textcnn, roberta, defend] -attack [copycat, generic, specific, all] -target_label [fake, real] -user_comms [yes, no]`
+
+## Test Copycat with Single Chance
+`python test.py -dataset [gossipcop, politifact] -model [textcnn, roberta, defend] -attack copycat -target_label [fake, real] -user_comms [yes, no] copycat_sing = yes`
+This command produces the results used for CopyCat in the ReST Adversary paper.
+
