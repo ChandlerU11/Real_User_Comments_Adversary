@@ -41,6 +41,12 @@ parser.add_argument(
     default='yes',
     help='Test with up to 10 user comments present? [yes, no]')
 
+parser.add_argument(
+    '-copycat_sing',
+    type=str,
+    default='no',
+    help='Test with up to 10 user comments present? [yes, no]')
+
 args = parser.parse_args()
 
 def wait(originalTime, fileName):
@@ -76,22 +82,30 @@ def get_preds():
     print("Test Run")
     return pre, post
 
-def copycat_attack(df):
+def copycat_attack(df, single_chance = False):
     cand_df = pd.read_csv('attack_candidate_files/copycat_attack_' + args.dataset + '.csv', converters = {'30_attack_comm':literal_eval})
     df = df.merge(cand_df[['id','30_attack_comm']], how = 'inner', on = 'id')
+    print(df)
     if args.target_label == 'real':
         df = df[df['label'] == 1].reset_index()
     else:
         df = df[df['label'] == 0].reset_index()
     
-    out_df = []
-    for i in range(len(df)):
-       test_df = pd.concat([df.loc[i].drop(columns = ['30_attack_comm']).to_frame().transpose()] * 30)
-       test_df['response'] = df.loc[i]['30_attack_comm']
-       out_df.append(test_df)
-    out_df = pd.concat(out_df)
-    print(out_df)
+    if single_chance == False:
+        out_df = []
+        for i in range(len(df)):
+            test_df = pd.concat([df.loc[i].drop(columns = ['30_attack_comm']).to_frame().transpose()] * 30)
+            test_df['response'] = df.loc[i]['30_attack_comm']
+            out_df.append(test_df)
+        out_df = pd.concat(out_df)
+        print(out_df)
     
+    else:
+        df['30_attack_comm'] = [random.choice(x) for x in df['30_attack_comm']]
+        df['response'] = df['30_attack_comm'].copy()
+        out_df = df.copy()
+        
+
     t5_gen_file = '../ReST_Temp_Files/T5_training_step_gen.csv'
     ot = os.path.getmtime(t5_gen_file)
     out_df.to_csv(t5_gen_file, escapechar = '\\')
@@ -202,10 +216,22 @@ def generic_attack(df):
 
 test = pd.read_csv('~/fake_news_data/'+ args.dataset + '_test.csv', converters = {'title':literal_eval,'content':literal_eval,'comments':literal_eval})
 
+import statistics
+
 if args.attack == 'copycat':
-    print("Test Copycat")
-    eff = copycat_attack(test)
-    print("Copycat effectiveness: ", eff)
+    
+    if args.copycat_sing == "yes":
+        print("Test Copycat with Single Chance")
+        eff_sing = []
+        for i in range(3):
+            eff_sing.append(copycat_attack(test, single_chance = True))
+        print("Copycat single chance effectiveness: ", statistics.mean(eff_sing) * 100)
+    
+    else:     
+        print("Test Copycat")   
+        eff = copycat_attack(test)
+        print("Copycat effectiveness: ", eff * 100)
+    
 
 elif args.attack == 'generic':
     print("Test Generic")
