@@ -30,5 +30,6 @@ Implementation of Copycat, Generic, and Topic-Specific attacks for fake news det
 
 ## Test Copycat with Single Chance
 `python test.py -dataset [gossipcop, politifact] -model [textcnn, roberta, defend] -attack copycat -target_label [fake, real] -user_comms [yes, no] -copycat_sing = yes`
+
 This command produces the results used for CopyCat in the ReST Adversary paper.
 
