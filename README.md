@@ -1,5 +1,5 @@
 # Real_User_Comments_Adversary
-Implementation of Copycat, Generic, and Topic-Specific attacks for fake news detectors. Uses the fake_news_data repo (https://github.com/ChandlerU11/fake_news_data) and interacts with surrogate classifiers in same manner as described in the ReST adversary README (https://github.com/ChandlerU11/ReST_Adversary). 
+Implementation of Copycat, Generic, and Topic-Specific attacks for fake news detectors. For necessary repo locations, see bottom of README.
 
 ## Workflow
 1. Clean fake news data (skip if already done  for ReST)
@@ -33,3 +33,16 @@ Implementation of Copycat, Generic, and Topic-Specific attacks for fake news det
 
 This command produces the results used for CopyCat in the ReST Adversary paper.
 
+
+## Repo Locations
+> Each of these repos contain an env.yml file that allows for dependency installation using anaconda. When running code in these repos remember that you must activate their respective conda environment. Some of these repos use same conda enviroment as the ReST_Adversary which is noted in their README files. For adversarial training (workflow step 5) to work properly, this repo and all the other repos need to be cloned into the same root folder and to remain in separate folders.
+
+Data with cleaning script - https://github.com/ChandlerU11/fake_news_data
+
+ReST - https://github.com/ChandlerU11/ReST_Adversary
+
+dEFEND - https://github.com/ChandlerU11/dEFEND_Surrogate
+
+RoBERTa - https://github.com/ChandlerU11/RoBERTa_Surrogate
+
+TextCNN - https://github.com/ChandlerU11/TextCNN_Surrogate
